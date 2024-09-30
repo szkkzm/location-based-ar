@@ -13,6 +13,7 @@
 </head>
 
 <body style='margin: 0; overflow: hidden;'>
+    <p id="location"></p>
     <a-scene
         vr-mode-ui="enabled: false"
 		embedded
@@ -21,3 +22,29 @@
         <a-camera gps-camera rotation-reader></a-camera>
 	</a-scene>
 </body>
+
+<script type="text/javascript">
+
+    var watchID;
+  
+    if (navigator.geolocation) {
+  
+      // 現在の位置情報を取得
+      watchID = navigator.geolocation.watchPosition(
+  
+        // 位置情報の取得を成功した場合
+        function (pos) {
+          var location = "<li>" + "緯度差：" + (33.9702406-pos.coords.latitude) + "</li>";
+          location += "<li>" + "経度差：" + (360-225.639123-pos.coords.longitude) + "</li>";
+          document.getElementById("location").innerText = location;
+        },
+        null,
+        { enableHighAccuracy: true }
+      );
+    } else {
+      window.alert("本ブラウザではGeolocationが使えません");
+    }
+    function clearWatchPosition() {
+      navigator.geolocation.clearWatch(watchID);
+    }
+  </script>
