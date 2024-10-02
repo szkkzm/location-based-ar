@@ -1,26 +1,166 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Location-based AR.js demo</title>
-    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <title>ロケーションベースのAR PWA（Three.js版）</title>
+    <!-- Three.jsの読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- AR.jsの読み込み（Three.js用） -->
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar.js"></script>
   </head>
-
   <body style="margin: 0; overflow: hidden;">
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
-    >
-      <a-text
-        value="This content will always face you."
-        look-at="[gps-camera]"
-        scale="50 50 50"
-        gps-entity-place="latitude: 33.973867; longitude: 134.360002;"
-      ></a-text>
-      <a-camera gps-camera rotation-reader> </a-camera>
-    </a-scene>
+    <script>
+      let scene, camera, renderer;
+      let arToolkitSource, arToolkitContext;
+      let markerRoot;
+      let mesh;
+
+      init();
+      animate();
+
+      function init() {
+        // シーンの作成
+        scene = new THREE.Scene();
+
+        // カメラの設定
+        camera = new THREE.Camera();
+        scene.add(camera);
+
+        // レンダラーの設定
+        renderer = new THREE.WebGLRenderer({
+          antialias: true,
+          alpha: true,
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.domElement.style.position = 'absolute';
+        renderer.domElement.style.top = '0px';
+        renderer.domElement.style.left = '0px';
+        document.body.appendChild(renderer.domElement);
+
+        // ARToolkitのソースを設定
+        arToolkitSource = new THREEx.ArToolkitSource({
+          sourceType: 'webcam',
+        });
+
+        function onResize() {
+          arToolkitSource.onResizeElement();
+          arToolkitSource.copyElementSizeTo(renderer.domElement);
+          if (arToolkitContext.arController !== null) {
+            arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
+          }
+        }
+
+        arToolkitSource.init(function onReady() {
+          onResize();
+        });
+
+        // ウィンドウリサイズのイベントハンドラ
+        window.addEventListener('resize', function () {
+          onResize();
+        });
+
+        // ARToolkitのコンテキストを作成
+        arToolkitContext = new THREEx.ArToolkitContext({
+          cameraParametersUrl: 'https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/data/camera_para.dat',
+          detectionMode: 'mono',
+        });
+
+        // コンテキストの初期化
+        arToolkitContext.init(function onCompleted() {
+          camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+        });
+
+        // ロケーションベースの設定
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const userLatitude = position.coords.latitude;
+              const userLongitude = position.coords.longitude;
+
+              // ターゲットの緯度と経度を設定
+              const targetLatitude = [緯度]; // 例: 35.6895
+              const targetLongitude = [経度]; // 例: 139.6917
+
+              // ユーザーとターゲット間の距離と方位を計算
+              const distance = getDistanceFromLatLonInMeters(
+                userLatitude,
+                userLongitude,
+                targetLatitude,
+                targetLongitude
+              );
+              const bearing = getBearing(
+                userLatitude,
+                userLongitude,
+                targetLatitude,
+                targetLongitude
+              );
+
+              // オブジェクトを配置
+              addObject(distance, bearing);
+            },
+            function (error) {
+              console.error('位置情報の取得に失敗しました', error);
+            },
+            {
+              enableHighAccuracy: true,
+            }
+          );
+        } else {
+          alert('お使いのブラウザではGeolocation APIがサポートされていません。');
+        }
+      }
+
+      function addObject(distance, bearing) {
+        // 距離と方位をThree.jsの座標に変換
+        const radians = (bearing * Math.PI) / 180;
+        const x = distance * Math.sin(radians);
+        const z = -distance * Math.cos(radians);
+
+        // 3Dオブジェクトの作成
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        mesh = new THREE.Mesh(geometry, material);
+
+        // オブジェクトの位置設定
+        mesh.position.set(x, 0, z);
+        scene.add(mesh);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        if (arToolkitSource.ready !== false)
+          arToolkitContext.update(arToolkitSource.domElement);
+
+        renderer.render(scene, camera);
+      }
+
+      // 緯度経度から距離を計算（メートル単位）
+      function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // 地球の半径（メートル）
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+        return distance;
+      }
+
+      // 緯度経度から方位を計算（度単位）
+      function getBearing(lat1, lon1, lat2, lon2) {
+        const y = Math.sin((lon2 - lon1) * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180));
+        const x =
+          Math.cos(lat1 * (Math.PI / 180)) * Math.sin(lat2 * (Math.PI / 180)) -
+          Math.sin(lat1 * (Math.PI / 180)) *
+            Math.cos(lat2 * (Math.PI / 180)) *
+            Math.cos((lon2 - lon1) * (Math.PI / 180));
+        const bearing = (Math.atan2(y, x) * 180) / Math.PI;
+        return (bearing + 360) % 360;
+      }
+    </script>
   </body>
 </html>
