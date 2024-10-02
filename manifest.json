@@ -1,21 +1,20 @@
 {
-    "name": "ロケーションベースのAR PWA（Three.js版）",
-    "short_name": "AR PWA Three.js",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#FFFFFF",
-    "description": "Three.jsを使用したロケーションベースのARアプリをPWAで実現",
-    "icons": [
-      {
-        "src": "icon-192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "icon-512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ]
-  }
-  
+  "name": "ロケーションベースのAR PWA",
+  "short_name": "AR PWA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "description": "ロケーションベースのARアプリをPWAで実現",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
