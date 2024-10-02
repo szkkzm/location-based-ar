@@ -23,7 +23,7 @@
       <a-box
         material="color: red"
         gps-entity-place="latitude: 33.9702352891; longitude: 134.360819286;"
-        scale="0.5 0.8 0.5"
+        scale="10 10 10"
       ></a-box>
 
       <a-camera gps-camera rotation-reader> </a-camera>
@@ -37,8 +37,8 @@
         const watchId = navigator.geolocation.watchPosition(
           function (position) {
             // 緯度と経度を取得
-            const latitude = position.coords.latitude - 33.9702352891;
-            const longitude = position.coords.longitude - 134.360819286;
+            const latitude = (position.coords.latitude - 33.9702352891) *10000;
+            const longitude = (position.coords.longitude - 134.360819286)*10000;
 
             // HTMLの<p>タグに反映
             const locationElement = document.getElementById('location');
