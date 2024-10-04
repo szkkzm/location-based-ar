@@ -40,7 +40,7 @@
             const locationElement = document.getElementById('location');
             locationElement.textContent = `現在地の緯度: ${diff_lati}, 経度: ${diff_longi}`;
 
-            if(diff_lati < 1 &&　diff_lati > -1 && diff_longi < 1 && diff_longi > 1){
+            if(diff_lati < 2 &&　diff_lati > -2 && diff_longi < 2 && diff_longi > -2){
               var sceneElement = document.getElementById('scene');
               var box = document.createElement('a-box');
               box.setAttribute("material","color: red");
