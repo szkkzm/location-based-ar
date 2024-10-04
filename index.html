@@ -30,6 +30,7 @@
       const longitude =  134.36294915865858;
       const sceneElement = document.getElementById('scene');
       const isShown = false;
+      const threshold = 1.2;
       if ('geolocation' in navigator) {
         // watchPositionを使用して位置情報をリアルタイムで取得
         const watchId = navigator.geolocation.watchPosition(
@@ -37,13 +38,12 @@
             // 緯度と経度を取得
             var diff_lati = (position.coords.latitude - latitude) *10000;
             var diff_longi = (position.coords.longitude - longitude)*10000;
-            
 
             // HTMLの<p>タグに反映
             const locationElement = document.getElementById('location');
             locationElement.textContent = `現在地の緯度: ${diff_lati}, 経度: ${diff_longi}`;
 
-            if(diff_lati < 2 && diff_lati > -2 && diff_longi < 2 && diff_longi > -2){
+            if(diff_lati < threshold && diff_lati > -1*threshold && diff_longi < threshold && diff_longi > -1*threshold){
               if(!isShown){
                 var box = document.createElement('a-box');
                 box.setAttribute("material","color: red");
