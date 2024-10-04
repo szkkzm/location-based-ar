@@ -47,16 +47,17 @@
               if(!isShown){
                 var box = document.createElement('a-box');
                 box.setAttribute("material","color: red");
-                box.setAttribute("position","0 2 -5");
-                box.setAttribute("scale", "0.8 0.8 0.8");
+                box.setAttribute("position","0 1 -5");
+                box.setAttribute("scale", "0.5 0.5 0.5");
                 sceneElement.appendChild(box);
                 isShown = true;
               }
             } else {
               if(isShown){
-                scene.removeChild(box);
+                var chi = scene.children[0];
+                scene.removeChild(chi);
+                isShown = false;
               }
-
             }
           },
           function (error) {
