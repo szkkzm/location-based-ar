@@ -28,25 +28,35 @@
       // ブラウザがGeolocation APIをサポートしているか確認
       const latitude = 33.972870723539344;
       const longitude =  134.36294915865858;
+      const sceneElement = document.getElementById('scene');
+      const isShown = false;
       if ('geolocation' in navigator) {
         // watchPositionを使用して位置情報をリアルタイムで取得
         const watchId = navigator.geolocation.watchPosition(
           function (position) {
             // 緯度と経度を取得
             var diff_lati = (position.coords.latitude - latitude) *10000;
-            const diff_longi = (position.coords.longitude - longitude)*10000;
+            var diff_longi = (position.coords.longitude - longitude)*10000;
+            
 
             // HTMLの<p>タグに反映
             const locationElement = document.getElementById('location');
             locationElement.textContent = `現在地の緯度: ${diff_lati}, 経度: ${diff_longi}`;
 
-            if(diff_lati < 2 &&　diff_lati > -2 && diff_longi < 2 && diff_longi > -2){
-              var sceneElement = document.getElementById('scene');
-              var box = document.createElement('a-box');
-              box.setAttribute("material","color: red");
-              box.setAttribute("position","0 2 -5");
-              box.setAttribute("scale", "0.8 0.8 0.8");
-              sceneElement.appendChild(box);
+            if(diff_lati < 2 && diff_lati > -2 && diff_longi < 2 && diff_longi > -2){
+              if(!isShown){
+                var box = document.createElement('a-box');
+                box.setAttribute("material","color: red");
+                box.setAttribute("position","0 2 -5");
+                box.setAttribute("scale", "0.8 0.8 0.8");
+                sceneElement.appendChild(box);
+                isShown = true;
+              }
+            } else {
+              if(isShown){
+                scene.removeChild(box);
+              }
+
             }
           },
           function (error) {
