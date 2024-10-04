@@ -15,33 +15,39 @@
       現在地を取得中...
     </p>
 
-    <a-scene
+    <a-scene id="scene"
     embedded
     arjs="sourceType: webcam;"
   >
-  <a-box
-  material="color: red"
-  position="0 0 -5"
-  gps-entity-place="latitude: 33.973840; longitude: 134.359977;"
-  scale="1 1 1"
-></a-box>
-<a-camera id='camera1' look-controls-enabled='false' arjs-look-controls='smoothingFactor: 0.1' gps-projected-camera='gpsMinDistance: 5'> </a-camera>
+  
+  <a-marker-camera preset="hiro"></a-marker-camera>
   </a-scene>
 
     <!-- 現在地をリアルタイムで取得して<p>タグに表示するスクリプト -->
     <script>
       // ブラウザがGeolocation APIをサポートしているか確認
+      const latitude = 33.972870723539344;
+      const longitude =  134.36294915865858;
       if ('geolocation' in navigator) {
         // watchPositionを使用して位置情報をリアルタイムで取得
         const watchId = navigator.geolocation.watchPosition(
           function (position) {
             // 緯度と経度を取得
-            const latitude = (position.coords.latitude - 33.973840) *10000;
-            const longitude = (position.coords.longitude - 134.359977)*10000;
+            var diff_lati = (position.coords.latitude - latitude) *10000;
+            const diff_longi = (position.coords.longitude - longitude)*10000;
 
             // HTMLの<p>タグに反映
             const locationElement = document.getElementById('location');
-            locationElement.textContent = `現在地の緯度: ${latitude}, 経度: ${longitude}`;
+            locationElement.textContent = `現在地の緯度: ${diff_lati}, 経度: ${diff_longi}`;
+
+            if(diff_lati < 1 &&　diff_lati > -1 && diff_longi < 1 && diff_longi > 1){
+              var sceneElement = document.getElementById('scene');
+              var box = document.createElement('a-box');
+              box.setAttribute("material","color: red");
+              box.setAttribute("position","0 2 -5");
+              box.setAttribute("scale", "0.8 0.8 0.8");
+              sceneElement.appendChild(box);
+            }
           },
           function (error) {
             // エラー処理
